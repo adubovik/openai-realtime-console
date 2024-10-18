@@ -68,6 +68,23 @@ export function ConsolePage() {
     localStorage.setItem('tmp::voice_api_key', apiKey);
   }
 
+  const azureService = localStorage.getItem('tmp::azure_service') ||
+      prompt('Azure OpenAI service name') ||
+      '';
+
+  if (azureService !== '') {
+    localStorage.setItem('tmp::azure_service', azureService);
+  }
+
+  const azureDeployment = localStorage.getItem('tmp::azure_deployment') ||
+      prompt('Azure OpenAI deployment name', 'gpt-4o-realtime-preview') ||
+      '';
+
+  if (azureDeployment !== '') {
+    localStorage.setItem('tmp::azure_deployment', azureDeployment);
+  }
+
+
   /**
    * Instantiate:
    * - WavRecorder (speech input)
@@ -85,6 +102,7 @@ export function ConsolePage() {
       LOCAL_RELAY_SERVER_URL
         ? { url: LOCAL_RELAY_SERVER_URL }
         : {
+            url: `https://${azureService}.openai.azure.com/openai/realtime?api-version=2024-10-01-preview&deployment=${azureDeployment}&api-key=${apiKey}`,
             apiKey: apiKey,
             dangerouslyAllowAPIKeyInBrowser: true,
           }
@@ -150,10 +168,28 @@ export function ConsolePage() {
    * When you click the API key
    */
   const resetAPIKey = useCallback(() => {
-    const apiKey = prompt('OpenAI API Key');
-    if (apiKey !== null) {
+    const value = prompt('Azure OpenAI API Key');
+    if (value !== null) {
       localStorage.clear();
-      localStorage.setItem('tmp::voice_api_key', apiKey);
+      localStorage.setItem('tmp::voice_api_key', value);
+      window.location.reload();
+    }
+  }, []);
+
+  const resetAzureService = useCallback(() => {
+    const value = prompt('Azure OpenAI service');
+    if (value !== null) {
+      localStorage.clear();
+      localStorage.setItem('tmp::azure_service', value);
+      window.location.reload();
+    }
+  }, []);
+
+  const resetAzureDeployment = useCallback(() => {
+    const value = prompt('Azure OpenAI deployment', 'gpt-4o-realtime-preview');
+    if (value !== null) {
+      localStorage.clear();
+      localStorage.setItem('tmp::azure_deployment', value);
       window.location.reload();
     }
   }, []);
@@ -520,6 +556,24 @@ export function ConsolePage() {
               onClick={() => resetAPIKey()}
             />
           )}
+        </div>
+        <div className="content-azure-service">
+          <Button
+            icon={Edit}
+            iconPosition="end"
+            buttonStyle="flush"
+            label={`service: ${azureService}`}
+            onClick={() => resetAzureService()}
+          />
+        </div>
+        <div className="content-azure-deployment">
+          <Button
+            icon={Edit}
+            iconPosition="end"
+            buttonStyle="flush"
+            label={`deployment: ${azureDeployment}`}
+            onClick={() => resetAzureDeployment()}
+          />
         </div>
       </div>
       <div className="content-main">
